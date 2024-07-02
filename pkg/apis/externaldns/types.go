@@ -106,6 +106,7 @@ type Config struct {
 	BluecatConfigFile                  string
 	BluecatDNSView                     string
 	BluecatGatewayHost                 string
+	BluecatHost                        string
 	BluecatRootZone                    string
 	BluecatDNSServerName               string
 	BluecatDNSDeployType               string
@@ -475,7 +476,7 @@ func (cfg *Config) ParseFlags(args []string) error {
 	app.Flag("traefik-disable-new", "Disable listeners on Resources under the traefik.io API Group").Default(strconv.FormatBool(defaultConfig.TraefikDisableNew)).BoolVar(&cfg.TraefikDisableNew)
 
 	// Flags related to providers
-	providers := []string{"akamai", "alibabacloud", "aws", "aws-sd", "azure", "azure-dns", "azure-private-dns", "bluecat", "civo", "cloudflare", "coredns", "designate", "digitalocean", "dnsimple", "dyn", "exoscale", "gandi", "godaddy", "google", "ibmcloud", "infoblox", "inmemory", "linode", "ns1", "oci", "ovh", "pdns", "pihole", "plural", "rcodezero", "rdns", "rfc2136", "safedns", "scaleway", "skydns", "tencentcloud", "transip", "ultradns", "vinyldns", "vultr", "webhook"}
+	providers := []string{"akamai", "alibabacloud", "aws", "aws-sd", "azure", "azure-dns", "azure-private-dns", "bluecat", "bluecatv2", "civo", "cloudflare", "coredns", "designate", "digitalocean", "dnsimple", "dyn", "exoscale", "gandi", "godaddy", "google", "ibmcloud", "infoblox", "inmemory", "linode", "ns1", "oci", "ovh", "pdns", "pihole", "plural", "rcodezero", "rdns", "rfc2136", "safedns", "scaleway", "skydns", "tencentcloud", "transip", "ultradns", "vinyldns", "vultr", "webhook"}
 	app.Flag("provider", "The DNS provider where the DNS records will be created (required, options: "+strings.Join(providers, ", ")+")").Required().PlaceHolder("provider").EnumVar(&cfg.Provider, providers...)
 	app.Flag("domain-filter", "Limit possible target zones by a domain suffix; specify multiple times for multiple domains (optional)").Default("").StringsVar(&cfg.DomainFilter)
 	app.Flag("exclude-domains", "Exclude subdomains (optional)").Default("").StringsVar(&cfg.ExcludeDomains)
@@ -511,14 +512,15 @@ func (cfg *Config) ParseFlags(args []string) error {
 	app.Flag("tencent-cloud-zone-type", "When using the Tencent Cloud provider, filter for zones with visibility (optional, options: public, private)").Default(defaultConfig.TencentCloudZoneType).EnumVar(&cfg.TencentCloudZoneType, "", "public", "private")
 
 	// Flags related to BlueCat provider
-	app.Flag("bluecat-dns-configuration", "When using the Bluecat provider, specify the Bluecat DNS configuration string (optional when --provider=bluecat)").Default("").StringVar(&cfg.BluecatDNSConfiguration)
-	app.Flag("bluecat-config-file", "When using the Bluecat provider, specify the Bluecat configuration file (optional when --provider=bluecat)").Default(defaultConfig.BluecatConfigFile).StringVar(&cfg.BluecatConfigFile)
-	app.Flag("bluecat-dns-view", "When using the Bluecat provider, specify the Bluecat DNS view string (optional when --provider=bluecat)").Default("").StringVar(&cfg.BluecatDNSView)
+	app.Flag("bluecat-dns-configuration", "When using the Bluecat (v2) provider, specify the Bluecat DNS configuration string (optional when --provider=bluecat)").Default("").StringVar(&cfg.BluecatDNSConfiguration)
+	app.Flag("bluecat-config-file", "When using the Bluecat (v2) provider, specify the Bluecat configuration file (optional when --provider=bluecat)").Default(defaultConfig.BluecatConfigFile).StringVar(&cfg.BluecatConfigFile)
+	app.Flag("bluecat-dns-view", "When using the Bluecat (v2) provider, specify the Bluecat DNS view string (optional when --provider=bluecat)").Default("").StringVar(&cfg.BluecatDNSView)
 	app.Flag("bluecat-gateway-host", "When using the Bluecat provider, specify the Bluecat Gateway Host (optional when --provider=bluecat)").Default("").StringVar(&cfg.BluecatGatewayHost)
-	app.Flag("bluecat-root-zone", "When using the Bluecat provider, specify the Bluecat root zone (optional when --provider=bluecat)").Default("").StringVar(&cfg.BluecatRootZone)
-	app.Flag("bluecat-skip-tls-verify", "When using the Bluecat provider, specify to skip TLS verification (optional when --provider=bluecat) (default: false)").BoolVar(&cfg.BluecatSkipTLSVerify)
-	app.Flag("bluecat-dns-server-name", "When using the Bluecat provider, specify the Bluecat DNS Server to initiate deploys against. This is only used if --bluecat-dns-deploy-type is not 'no-deploy' (optional when --provider=bluecat)").Default("").StringVar(&cfg.BluecatDNSServerName)
-	app.Flag("bluecat-dns-deploy-type", "When using the Bluecat provider, specify the type of DNS deployment to initiate after records are updated. Valid options are 'full-deploy' and 'no-deploy'. Deploy will only execute if --bluecat-dns-server-name is set (optional when --provider=bluecat)").Default(defaultConfig.BluecatDNSDeployType).StringVar(&cfg.BluecatDNSDeployType)
+	app.Flag("bluecat-host", "When using the Bluecat V2 provider, specify the Bluecat Gateway Host (optional when --provider=bluecat)").Default("").StringVar(&cfg.BluecatHost)
+	app.Flag("bluecat-root-zone", "When using the Bluecat (v2) provider, specify the Bluecat root zone (optional when --provider=bluecat)").Default("").StringVar(&cfg.BluecatRootZone)
+	app.Flag("bluecat-skip-tls-verify", "When using the Bluecat (v2) provider, specify to skip TLS verification (optional when --provider=bluecat) (default: false)").BoolVar(&cfg.BluecatSkipTLSVerify)
+	app.Flag("bluecat-dns-server-name", "When using the Bluecat (v2) provider, specify the Bluecat DNS Server to initiate deploys against. This is only used if --bluecat-dns-deploy-type is not 'no-deploy' (optional when --provider=bluecat)").Default("").StringVar(&cfg.BluecatDNSServerName)
+	app.Flag("bluecat-dns-deploy-type", "When using the Bluecat (v2) provider, specify the type of DNS deployment to initiate after records are updated. Valid options are 'full-deploy' and 'no-deploy'. Deploy will only execute if --bluecat-dns-server-name is set (optional when --provider=bluecat)").Default(defaultConfig.BluecatDNSDeployType).StringVar(&cfg.BluecatDNSDeployType)
 
 	app.Flag("cloudflare-proxied", "When using the Cloudflare provider, specify if the proxy mode must be enabled (default: disabled)").BoolVar(&cfg.CloudflareProxied)
 	app.Flag("cloudflare-dns-records-per-page", "When using the Cloudflare provider, specify how many DNS records listed per page, max possible 5,000 (default: 100)").Default(strconv.Itoa(defaultConfig.CloudflareDNSRecordsPerPage)).IntVar(&cfg.CloudflareDNSRecordsPerPage)
