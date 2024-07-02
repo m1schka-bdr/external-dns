@@ -1,0 +1,12 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/deepmap/oapi-codegen/HEAD/configuration-schema.json
+package: api
+output: models.gen.go
+generate:
+  models: true
+  client: false
+output-options:
+  include-tags: ["User and Group Resources", "Admin Resources", "Resource Record Resources", "View and Zone Resources", "IPv4 and IPv6 Resources", "Server Resources"]
+  exclude-tags: []
+  include-operation-ids: ["getSessions", "getZones", "getZone", "getResourceRecords", "getAddresses", "postZoneResourceRecord", "postZoneDeployment"]
+  exclude-operation-ids: []
+  exclude-schemas: []
